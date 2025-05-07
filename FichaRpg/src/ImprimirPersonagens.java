@@ -11,7 +11,7 @@ public class ImprimirPersonagens {
             int contador = 1;
             for (Personagem p : personagens.values()) {
                 System.out.println("\n--- Personagem " + contador + " ---");
-                // Vamos usar o método toString() da classe Personagem que já está formatado
+
                 System.out.println(p.toString());
                 contador++;
             }
