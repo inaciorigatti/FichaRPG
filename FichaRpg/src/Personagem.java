@@ -1,15 +1,18 @@
+import java.io.Serializable;
 import java.util.Scanner;
 
-public class Personagem {
+public class Personagem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String nome;
     private int idade;
     private double altura;
     private double peso;
-    private String classeNome; // "Rockerboy", "Solo", "Tech"
-    private String arma;
+    private ClassePersonagem classe; // Usando o enum ClassePersonagem
+    private Arma arma; // Usando o enum Arma
     private String descricao;
 
-    // Atributos específicos da classe
+    // Atributos específicos da classe (agora obtidos do enum)
     private int inteligencia;
     private int reflexos;
     private int destrezaTecnica;
@@ -20,84 +23,26 @@ public class Personagem {
     private int corpo;
     private int empatia;
 
-
-    private Personagem(String nome, int idade, double altura, double peso, int escolhaClasse, int escolhaArma, String descricao) {
+    private Personagem(String nome, int idade, double altura, double peso,
+                       ClassePersonagem classe, Arma arma, String descricao) {
         this.nome = nome;
         this.idade = idade;
         this.altura = altura;
         this.peso = peso;
+        this.classe = classe;
+        this.arma = arma;
         this.descricao = descricao;
 
-        definirClasseEAtributos(escolhaClasse);
-        definirArma(escolhaArma);
-    }
-
-    private void definirClasseEAtributos(int escolhaClasse) {
-        switch (escolhaClasse) {
-            case 1: // Rockerboy
-                this.classeNome = "Rockerboy";
-                this.inteligencia = 7;
-                this.reflexos = 6;
-                this.destrezaTecnica = 8;
-                this.frieza = 5;
-                this.vontade = 6;
-                this.sorte = 5;
-                this.movimento = 5;
-                this.corpo = 5;
-                this.empatia = 3;
-                break;
-            case 2: // Solo
-                this.classeNome = "Solo";
-                this.inteligencia = 5;
-                this.reflexos = 8;
-                this.destrezaTecnica = 5;
-                this.frieza = 9;
-                this.vontade = 7;
-                this.sorte = 7;
-                this.movimento = 7;
-                this.corpo = 8;
-                this.empatia = 6;
-                break;
-            case 3: // Tech
-                this.classeNome = "Tech";
-                this.inteligencia = 9;
-                this.reflexos = 7;
-                this.destrezaTecnica = 8;
-                this.frieza = 2;
-                this.vontade = 6;
-                this.sorte = 3;
-                this.movimento = 7;
-                this.corpo = 5;
-                this.empatia = 1;
-                break;
-            default:
-                this.classeNome = "Indefinida";
-                this.inteligencia = 0;
-                this.reflexos = 0;
-                this.destrezaTecnica = 0;
-                this.frieza = 0;
-                this.vontade = 0;
-                this.sorte = 0;
-                this.movimento = 0;
-                this.corpo = 0;
-                this.empatia = 0;
-                break;
-        }
-    }
-
-    private void definirArma(int escolhaArma) {
-        switch (escolhaArma) {
-            case 1: this.arma = "Pistola Pesada"; break;
-            case 2: this.arma = "Rifle de Assalto"; break;
-            case 3: this.arma = "Faca de Combate"; break;
-            case 4: this.arma = "Espingarda"; break;
-            case 5: this.arma = "SMG"; break;
-            case 6: this.arma = "Espada"; break;
-            case 7: this.arma = "Rifle"; break;
-            case 8: this.arma = "Sniper"; break;
-            case 9: this.arma = "Lança-chamas"; break;
-            default: this.arma = "Desarmado"; break;
-        }
+        // Atribui os atributos baseados na classe escolhida
+        this.inteligencia = classe.inteligencia;
+        this.reflexos = classe.reflexos;
+        this.destrezaTecnica = classe.destrezaTecnica;
+        this.frieza = classe.frieza;
+        this.vontade = classe.vontade;
+        this.sorte = classe.sorte;
+        this.movimento = classe.movimento;
+        this.corpo = classe.corpo;
+        this.empatia = classe.empatia;
     }
 
     // Getters
@@ -114,10 +59,10 @@ public class Personagem {
         return peso;
     }
     public String getClasseNome() {
-        return classeNome;
+        return classe.nome;
     }
     public String getArma() {
-        return arma;
+        return arma.nome;
     }
     public String getDescricao() {
         return descricao;
@@ -157,8 +102,8 @@ public class Personagem {
                 "  Idade: " + idade + "\n" +
                 "  Altura: " + altura + "m\n" +
                 "  Peso: " + peso + "kg\n" +
-                "  Classe: " + classeNome + "\n" +
-                "  Arma: " + arma + "\n" +
+                "  Classe: " + classe.nome + "\n" +
+                "  Arma: " + arma.nome + "\n" +
                 "  Descrição: " + descricao + "\n" +
                 "  Atributos:\n" +
                 "    Inteligência: " + inteligencia + "\n" +
@@ -190,56 +135,56 @@ public class Personagem {
         double peso = lerDouble(scanner, "Peso do personagem (ex: 70.5): ", "Peso inválido. Deve ser um número positivo.");
 
         System.out.println("\nEscolha a Classe:");
-        System.out.println("1. Rockerboy");
-        System.out.println("2. Solo");
-        System.out.println("3. Tech");
-        int escolhaClasse = -1;
+        for (ClassePersonagem classe : ClassePersonagem.values()) {
+            if (classe != ClassePersonagem.INDEFINIDA) {
+                System.out.println((classe.ordinal() + 1) + ". " + classe.nome);
+            }
+        }
+        ClassePersonagem classeEscolhida = null;
         do {
-            System.out.print("Opção da Classe (1-3): ");
+            System.out.print("Opção da Classe (1-" + (ClassePersonagem.values().length - 1) + "): ");
             try {
                 String input = scanner.nextLine();
                 if (input.trim().isEmpty()) {
                     System.out.println("Entrada não pode ser vazia.");
                     continue;
                 }
-                escolhaClasse = Integer.parseInt(input);
-                if (escolhaClasse < 1 || escolhaClasse > 3) {
+                int escolha = Integer.parseInt(input);
+                if (escolha >= 1 && escolha < ClassePersonagem.values().length) {
+                    classeEscolhida = ClassePersonagem.values()[escolha - 1];
+                } else {
                     System.out.println("Opção de classe inválida. Tente novamente.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Entrada inválida para classe. Por favor, insira um número.");
-                escolhaClasse = -1;
             }
-        } while (escolhaClasse < 1 || escolhaClasse > 3);
+        } while (classeEscolhida == null);
 
         System.out.println("\nEscolha a Arma:");
-        System.out.println("1. Pistola Pesada");
-        System.out.println("2. Rifle de Assalto");
-        System.out.println("3. Faca de Combate");
-        System.out.println("4. Espingarda");
-        System.out.println("5. SMG");
-        System.out.println("6. Espada");
-        System.out.println("7. Rifle");
-        System.out.println("8. Sniper");
-        System.out.println("9. Lança-chamas");
-        int escolhaArma = -1;
+        for (Arma arma : Arma.values()) {
+            if (arma != Arma.DESARMADO) {
+                System.out.println((arma.ordinal() + 1) + ". " + arma.nome);
+            }
+        }
+        Arma armaEscolhida = null;
         do {
-            System.out.print("Opção da Arma (1-9): ");
+            System.out.print("Opção da Arma (1-" + (Arma.values().length - 1) + "): ");
             try {
                 String input = scanner.nextLine();
                 if (input.trim().isEmpty()) {
                     System.out.println("Entrada não pode ser vazia.");
                     continue;
                 }
-                escolhaArma = Integer.parseInt(input);
-                if (escolhaArma < 1 || escolhaArma > 9) {
+                int escolha = Integer.parseInt(input);
+                if (escolha >= 1 && escolha < Arma.values().length) {
+                    armaEscolhida = Arma.values()[escolha - 1];
+                } else {
                     System.out.println("Opção de arma inválida. Tente novamente.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Entrada inválida para arma. Por favor, insira um número.");
-                escolhaArma = -1;
             }
-        } while (escolhaArma < 1 || escolhaArma > 9);
+        } while (armaEscolhida == null);
 
         System.out.print("Descrição/História do personagem: ");
         String descricao = scanner.nextLine();
@@ -249,9 +194,8 @@ public class Personagem {
             descricao = scanner.nextLine();
         }
 
-        return new Personagem(nome, idade, altura, peso, escolhaClasse, escolhaArma, descricao);
+        return new Personagem(nome, idade, altura, peso, classeEscolhida, armaEscolhida, descricao);
     }
-
 
     private static int lerInteiro(Scanner scanner, String mensagemPrompt, String mensagemErro) {
         int valor = -1;

@@ -1,14 +1,12 @@
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Menu {
-
     private Map<String, Personagem> personagens;
     private Scanner scanner;
 
     public Menu() {
-        this.personagens = new HashMap<>();
+        this.personagens = SalvarPersonagens.carregar();
         this.scanner = new Scanner(System.in);
     }
 
@@ -48,6 +46,7 @@ public class Menu {
         switch (escolha) {
             case 0:
                 System.out.println("Saindo do programa...");
+                SalvarPersonagens.salvar(personagens); // Salva antes de sair
                 scanner.close();
                 System.exit(0);
                 break;
@@ -57,26 +56,43 @@ public class Menu {
                 break;
 
             case 2:
-                System.out.println("Funcionalidade 'Deletar personagem' ainda não implementada.");
-                mostrarMenu();
+                deletarPersonagem();
                 break;
 
             case 3:
-                // Chama o método estático da classe VisualizadorPersonagens
                 ImprimirPersonagens.exibirListaDePersonagens(this.personagens);
-                mostrarMenu(); // Volta ao menu
+                mostrarMenu();
                 break;
         }
     }
 
     private void criarPersonagem() {
-        // Chama o método estático da classe Personagem para lidar com a criação
         Personagem novoPersonagem = Personagem.criarNovoPersonagemComEntradaDoUsuario(this.scanner);
         personagens.put(novoPersonagem.getNome(), novoPersonagem);
+        SalvarPersonagens.salvar(personagens);
 
         System.out.println("\nPersonagem \"" + novoPersonagem.getNome() + "\" criado com sucesso!");
-
         mostrarMenu();
     }
 
+    private void deletarPersonagem() {
+        if (personagens.isEmpty()) {
+            System.out.println("Não há personagens para deletar.");
+            mostrarMenu();
+            return;
+        }
+
+        ImprimirPersonagens.exibirListaDePersonagens(this.personagens);
+        System.out.print("\nDigite o nome do personagem a ser deletado: ");
+        String nome = scanner.nextLine();
+
+        if (personagens.containsKey(nome)) {
+            personagens.remove(nome);
+            SalvarPersonagens.salvar(personagens);
+            System.out.println("Personagem \"" + nome + "\" deletado com sucesso!");
+        } else {
+            System.out.println("Personagem não encontrado.");
+        }
+        mostrarMenu();
+    }
 }
